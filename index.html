@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>빈 시간 채우기 시연</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#3182F6; --blue-d:#1B64DA; --blue-l:#E8F3FF;
+  --g900:#191F28; --g800:#333D4B; --g700:#4E5968; --g600:#6B7684; --g500:#8B95A1;
+  --g300:#D1D6DB; --g200:#E5E8EB; --g100:#F2F4F6; --g50:#F9FAFB;
+  --green:#00A661; --green-l:#EAF9F2; --orange:#F57800; --orange-l:#FFF4E6; --red:#F04452; --red-l:#FFEEEE;
+  --bg:#F2F4F6; --card:#fff;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:"Noto Sans KR","Malgun Gothic",sans-serif; background:var(--bg); color:var(--g900); font-size:14px; line-height:1.5; letter-spacing:-0.01em; word-break:keep-all; }
+button{ font:inherit; cursor:pointer; border:0; }
+.wrap{ max-width:1440px; margin:0 auto; padding:20px 24px 32px; }
+
+/* top */
+.top{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+.top h1{ font-size:22px; font-weight:800; letter-spacing:-0.03em; }
+.top .sub{ color:var(--g600); font-size:13px; }
+.badge{ display:inline-block; font-size:11px; font-weight:700; color:var(--g700); background:var(--g200); border-radius:99px; padding:2px 9px; margin-left:6px; vertical-align:middle; }
+.steps{ display:flex; gap:6px; margin-top:14px; }
+.steps button{ flex:1; background:var(--card); border-radius:12px; padding:9px 12px; text-align:left; color:var(--g600); border:2px solid transparent; }
+.steps button .t{ font-size:11px; font-weight:700; color:var(--g500); }
+.steps button .n{ font-size:14px; font-weight:700; }
+.steps button.on{ border-color:var(--blue); color:var(--g900); }
+.steps button.on .t{ color:var(--blue); }
+.steps button.done{ color:var(--g800); }
+.why{ margin-top:10px; background:var(--card); border-radius:12px; padding:10px 14px; display:flex; gap:10px; align-items:center; font-size:13.5px; color:var(--g800); }
+.why b{ color:var(--blue-d); white-space:nowrap; }
+.nav{ display:flex; gap:6px; margin-left:auto; }
+.nav button{ background:var(--g100); border-radius:10px; padding:6px 14px; font-weight:700; color:var(--g700); }
+.nav button.p{ background:var(--blue); color:#fff; }
+.nav button:disabled{ opacity:.35; cursor:default; }
+
+/* panels */
+.stage{ display:grid; grid-template-columns:1.35fr .8fr 1fr; gap:14px; margin-top:14px; align-items:start; }
+.panel .lab{ font-size:12px; font-weight:700; color:var(--g600); margin:0 0 6px 4px; display:flex; gap:6px; align-items:center; }
+.panel .lab i{ font-style:normal; font-size:11px; color:var(--g500); font-weight:500; }
+.dev{ background:var(--card); border-radius:20px; box-shadow:0 1px 3px rgba(0,0,0,.05); overflow:hidden; position:relative; }
+.dev.tab{ min-height:560px; }
+.dev.phone{ min-height:560px; border:8px solid #1f2329; border-radius:34px; background:#F9FAFB; }
+.dev.term{ min-height:560px; border:10px solid #2B3038; border-radius:22px; background:#fff; }
+.scr{ padding:18px; }
+.hide{ display:none !important; }
+
+/* owner (pos app) */
+.ap-h{ display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--g100); }
+.ap-h b{ font-size:15px; }
+.ap-h span{ font-size:12px; color:var(--g500); }
+.h2{ font-size:18px; font-weight:800; letter-spacing:-0.02em; }
+.muted{ color:var(--g600); } .small{ font-size:12px; color:var(--g500); }
+.chart{ display:flex; align-items:flex-end; gap:5px; height:150px; margin-top:12px; padding:0 2px; }
+.chart .c{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+.chart .bar{ width:100%; border-radius:6px 6px 2px 2px; background:var(--g200); position:relative; }
+.chart .bar.gap{ background:var(--orange); }
+.chart .bar.avg{ position:absolute; left:0; right:0; border-top:2px dashed var(--g500); background:transparent; border-radius:0; }
+.chart .bar.now{ background:var(--blue); }
+.chart .bar .mk{ position:absolute; left:-2px; right:-2px; border-top:2px dashed #fff; }
+.chart .x{ font-size:10.5px; color:var(--g500); }
+.legend{ display:flex; gap:12px; font-size:11.5px; color:var(--g600); margin-top:6px; }
+.legend span::before{ content:""; display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:4px; vertical-align:-1px; background:var(--c); }
+.card{ border-radius:16px; padding:14px 16px; margin-top:14px; }
+.card.rec{ background:var(--blue-l); }
+.card.rec .t{ font-size:12px; font-weight:700; color:var(--blue-d); }
+.card.rec .m{ font-size:16px; font-weight:800; margin-top:2px; }
+.card.gray{ background:var(--g50); }
+.btn{ display:block; width:100%; background:var(--blue); color:#fff; font-weight:700; border-radius:12px; padding:12px; margin-top:12px; font-size:15px; }
+.btn.sec{ background:var(--g100); color:var(--g800); }
+.btn:disabled{ background:var(--g200); color:var(--g500); cursor:default; }
+.field{ margin-top:14px; }
+.field > .k{ font-size:12.5px; font-weight:700; color:var(--g700); margin-bottom:6px; }
+.chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.chip{ background:var(--g100); color:var(--g700); border-radius:10px; padding:8px 12px; font-weight:600; font-size:13px; border:2px solid transparent; text-align:left; }
+.chip small{ display:block; font-size:11px; color:var(--g500); font-weight:500; }
+.chip.on{ background:var(--blue-l); color:var(--blue-d); border-color:var(--blue); }
+.chip.on small{ color:var(--blue-d); }
+.chip:disabled{ opacity:.45; cursor:not-allowed; text-decoration:line-through; }
+.tog{ display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--g50); border-radius:12px; padding:10px 12px; }
+.tog .k2{ font-weight:700; font-size:13.5px; }
+.tog .d{ font-size:12px; color:var(--g600); }
+.sw{ width:44px; height:26px; border-radius:99px; background:var(--g300); position:relative; flex:0 0 auto; transition:.15s; }
+.sw::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.15s; }
+.sw.on{ background:var(--blue); } .sw.on::after{ left:21px; }
+.est{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:12px; }
+.est > div{ background:var(--g50); border-radius:12px; padding:9px 10px; }
+.est .k3{ font-size:11px; color:var(--g500); font-weight:700; }
+.est .v{ font-size:17px; font-weight:800; }
+.est .v.warn{ color:var(--orange); } .est .v.good{ color:var(--green); }
+.note{ font-size:12px; color:var(--g600); margin-top:8px; }
+.note.warn{ color:var(--orange); font-weight:600; }
+.kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; }
+.kpis > div{ background:var(--g50); border-radius:14px; padding:12px; }
+.kpis .k3{ font-size:12px; color:var(--g600); font-weight:700; }
+.kpis .v{ font-size:22px; font-weight:800; letter-spacing:-0.03em; }
+.kpis .v small{ font-size:13px; font-weight:700; }
+.up{ color:var(--blue); } .dn{ color:var(--red); }
+.live{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--green); background:var(--green-l); border-radius:99px; padding:3px 10px; }
+.live::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--green); }
+.seg{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+.seg th{ text-align:left; color:var(--g500); font-size:11.5px; font-weight:700; padding:5px 6px; border-bottom:1px solid var(--g200); }
+.seg td{ padding:7px 6px; border-bottom:1px solid var(--g100); }
+.seg td.r, .seg th.r{ text-align:right; }
+
+/* phone */
+.ph-bar{ display:flex; justify-content:space-between; font-size:11px; font-weight:700; padding:8px 16px 4px; color:var(--g800); }
+.ph-h{ padding:6px 16px 10px; font-weight:800; font-size:15px; border-bottom:1px solid var(--g200); background:#fff; }
+.ph-body{ padding:14px; }
+.empty{ text-align:center; color:var(--g500); padding:80px 10px; font-size:13px; }
+.kakao{ background:#ABC1D1; border-radius:14px; padding:12px; }
+.kakao .from{ font-size:11.5px; color:#3d4650; font-weight:700; margin-bottom:6px; }
+.bubble{ background:#fff; border-radius:12px; overflow:hidden; }
+.bubble .hd{ background:#FEE500; padding:8px 12px; font-weight:800; font-size:12.5px; }
+.bubble .bd{ padding:12px; font-size:13px; }
+.bubble .bd b{ display:block; font-size:15px; margin-bottom:4px; }
+.bubble .cta{ display:block; width:calc(100% - 24px); margin:0 12px 12px; background:var(--g100); border-radius:8px; padding:9px; font-weight:700; color:var(--g800); }
+.time{ font-size:11px; color:#3d4650; text-align:right; margin-top:4px; }
+.coupon{ background:#fff; border-radius:16px; padding:14px; border:1px solid var(--g200); margin-top:12px; display:flex; gap:12px; align-items:center; }
+.coupon .amt{ font-size:20px; font-weight:800; color:var(--blue); min-width:76px; }
+.coupon .t2{ font-weight:700; }
+.coupon .d{ font-size:12px; color:var(--g600); }
+.coupon.used{ opacity:.55; }
+.stamp{ display:flex; gap:5px; margin-top:8px; }
+.stamp i{ width:20px; height:20px; border-radius:50%; background:var(--g200); }
+.stamp i.on{ background:var(--blue); }
+
+/* terminal */
+.tm{ padding:18px; min-height:540px; display:flex; flex-direction:column; }
+.tm .shop{ font-size:12px; color:var(--g500); font-weight:700; }
+.tm .big{ font-size:30px; font-weight:800; letter-spacing:-0.03em; margin-top:4px; }
+.tm .line{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--g100); font-size:14.5px; }
+.tm .line.dc{ color:var(--blue-d); font-weight:700; }
+.tm .grow{ flex:1; }
+.pad{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; }
+.pad span{ background:var(--g100); border-radius:10px; text-align:center; padding:10px 0; font-weight:700; color:var(--g700); }
+.num{ font-size:24px; font-weight:800; letter-spacing:.04em; text-align:center; background:var(--g50); border-radius:12px; padding:12px; margin-top:12px; }
+.found{ background:var(--blue-l); border-radius:14px; padding:12px 14px; margin-top:12px; }
+.found .t{ font-size:12px; color:var(--blue-d); font-weight:700; }
+.found .m{ font-weight:800; font-size:16px; }
+.pm{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.pm span{ background:var(--g100); border-radius:12px; padding:14px 8px; text-align:center; font-weight:700; color:var(--g700); }
+.ok{ text-align:center; margin:auto 0; }
+.ok .circle{ width:64px; height:64px; border-radius:50%; background:var(--blue); color:#fff; font-size:32px; line-height:64px; margin:0 auto 12px; font-weight:800; }
+
+/* bottom */
+.bottom{ display:grid; grid-template-columns:1.2fr 1fr; gap:14px; margin-top:14px; }
+.box{ background:var(--card); border-radius:20px; padding:16px 18px; }
+.box .h3{ font-size:14px; font-weight:800; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.box .h3 span{ font-size:11.5px; color:var(--g500); font-weight:500; }
+.funnel{ display:grid; grid-template-columns:96px 1fr 64px; gap:6px 10px; align-items:center; font-size:13px; }
+.funnel .b{ height:20px; border-radius:6px; background:var(--g100); position:relative; overflow:hidden; }
+.funnel .b i{ position:absolute; inset:0 auto 0 0; background:var(--blue); border-radius:6px; transition:width .35s; }
+.funnel .b.o i{ background:var(--orange); }
+.funnel .r{ text-align:right; font-weight:700; }
+.log{ max-height:196px; overflow:auto; font-size:12.5px; }
+.log div{ display:grid; grid-template-columns:76px 72px 1fr; gap:8px; padding:5px 0; border-bottom:1px solid var(--g100); }
+.log .w{ color:var(--g500); }
+.log .who{ font-weight:700; }
+.log .who.o{ color:var(--blue-d); } .log .who.c{ color:var(--green); } .log .who.t{ color:var(--g700); }
+.foot{ margin-top:12px; font-size:11.5px; color:var(--g500); }
+@media (max-width:1100px){ .stage{ grid-template-columns:1fr; } .bottom{ grid-template-columns:1fr; } .steps{ flex-wrap:wrap; } .steps button{ flex:1 1 30%; } }
+@media (max-width:560px){ .wrap{ padding:12px 16px 24px; } .steps button{ flex:1 1 45%; } .why{ flex-wrap:wrap; } }
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>빈 시간 채우기 <span class="badge">시연 · 가상 매장</span></h1>
+      <p class="sub">매출 리포트가 찾은 한가한 시간에, 쿠폰을 버튼 몇 번으로 보내고 결과까지 확인하는 흐름</p>
+    </div>
+    <div class="nav"><button id="prev">이전</button><button id="next" class="p">다음</button></div>
+  </div>
+  <div class="steps" id="steps"></div>
+  <div class="why"><b id="whyT">왜</b><span id="why"></span></div>
+
+  <div class="stage">
+    <!-- 사장님 -->
+    <div class="panel">
+      <div class="lab">사장님 · 토스 포스 앱 <i>매출 리포트 · 쿠폰</i></div>
+      <div class="dev tab">
+        <div class="ap-h"><b>소담커피 <span class="small">(가상 매장)</span></b><span id="clock">월 09:00</span></div>
+        <div class="scr" id="owner"></div>
+      </div>
+    </div>
+    <!-- 손님 -->
+    <div class="panel">
+      <div class="lab">손님 · 휴대폰 <i>알림톡 · 토스 앱</i></div>
+      <div class="dev phone">
+        <div class="ph-bar"><span id="phClock">09:00</span><span>●●● 5G</span></div>
+        <div class="ph-h" id="phTitle">알림</div>
+        <div class="ph-body" id="phone"></div>
+      </div>
+    </div>
+    <!-- 단말기 -->
+    <div class="panel">
+      <div class="lab">계산대 · 토스 프론트 <i>손님이 보는 단말기 화면</i></div>
+      <div class="dev term"><div class="tm" id="term"></div></div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="box">
+      <div class="h3">이번 쿠폰의 흐름 <span id="fnNote">발송 전 · 예상값</span></div>
+      <div class="funnel" id="funnel"></div>
+    </div>
+    <div class="box">
+      <div class="h3">기록 <span>모든 화면의 일이 한 줄로 남습니다</span></div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+  <p class="foot">가상 매장 · 가상 손님 198명(마케팅 수신 동의)으로 돌린 시뮬레이션입니다. 실제 토스플레이스 데이터 · 화면이 아니며, 같은 설정이면 언제나 같은 결과가 나옵니다(시드 고정).</p>
+</div>
+
+<script>
+(() => {
+// ───── 시드 고정 난수 ─────
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const rnd = mulberry32(20261026);
+
+// ───── 가상 매장 ─────
+const HOURS = [9,10,11,12,13,14,15,16,17,18,19,20];
+const AVG4W = [168,142,205,372,330,158,92,88,136,196,148,86];   // 최근 4주 화요일 평균(천 원)
+const WEEKAVG = 196;                                               // 모든 시간 평균(천 원)
+const GAP = [6,7];                                                 // 15시 · 16시 칸
+const TICKET = 6200;
+const MARGIN = 0.6;                                                // 원가 40% 가정
+const SEGS = {
+  reg:  { name:'단골',          n:48, habit:.35, p0h:.55, p0:.06, open:.70, up:[.09,.13,.145] },
+  pre:  { name:'예비 단골',     n:86, habit:.10, p0h:.35, p0:.03, open:.55, up:[.08,.12,.135] },
+  slp:  { name:'한동안 안 온 손님', n:64, habit:0,   p0h:0,   p0:.005, open:.40, up:[.055,.09,.10] },
+};
+const DISC = [500,1000,1500];
+// 손님 198명: 각자 고정된 주사위(열람 · 방문 · 동행 · 재방문 · 이번 주 다른 쿠폰)
+const CUST = [];
+for (const k of Object.keys(SEGS)) {
+  const s = SEGS[k];
+  for (let i=0;i<s.n;i++) CUST.push({ seg:k, habit: rnd()<s.habit, uo:rnd(), uv:rnd(), up:rnd(), ur:rnd(), capped: rnd()<.07 });
+}
+
+// ───── 상태 ─────
+const st = { step:0, segs:{reg:true,pre:true,slp:true}, disc:1, exclHabit:true, sendAt:'tue13', sent:false,
+             phoneGot:false, term:0, log:[] };
+
+function target(c){ return st.segs[c.seg] && !c.capped && !(st.exclHabit && c.habit); }
+function p0(c){ const s=SEGS[c.seg]; return c.habit? s.p0h : s.p0; }
+
+// 기대값(발송 전 예상)
+function expect(){
+  let sent=0, open=0, use=0, cann=0, inc=0;
+  for (const c of CUST){ if(!target(c)) continue; const s=SEGS[c.seg]; sent++;
+    open+=s.open; const b=p0(c); const pw=Math.min(1,b+s.up[st.disc]);
+    use+=s.open*pw + (1-s.open)*0; cann+=s.open*b; inc+=s.open*(pw-b); }
+  const cost=use*DISC[st.disc]; return { sent, open, use, cann, inc, cost, cannRate: use? cann/use:0, profit: inc*TICKET*1.3*MARGIN - cost };
+}
+// 실제(시드 고정 추첨)
+function realize(){
+  const r={ sent:0, open:0, visit:0, use:0, cann:0, inc:0, revisit:0, rev:0, cost:0, seg:{} };
+  for (const k in SEGS) r.seg[k]={ sent:0, use:0, cann:0, inc:0 };
+  for (const c of CUST){ if(!target(c)) continue; const s=SEGS[c.seg]; const g=r.seg[c.seg];
+    r.sent++; g.sent++;
+    const opened = c.uo < s.open; if(opened) r.open++;
+    const b=p0(c); const pw = opened? Math.min(1,b+s.up[st.disc]) : b;
+    if (c.uv < pw){ r.visit++;
+      if (opened){ r.use++; g.use++; r.cost+=DISC[st.disc];
+        if (c.uv < b){ r.cann++; g.cann++; } else { r.inc++; g.inc++; r.rev += TICKET*(c.up<.3?2:1); if (c.ur<.3) r.revisit++; } } } }
+  r.cannRate = r.use? r.cann/r.use : 0;
+  r.net = r.rev - r.cost;
+  r.profit = r.rev*MARGIN - r.cost;
+  return r;
+}
+const won = n => Math.round(n).toLocaleString('ko-KR')+'원';
+const pct = n => Math.round(n*100)+'%';
+const $ = id => document.getElementById(id);
+
+// ───── 단계 ─────
+const STEPS = [
+  { t:'월 09:00', n:'리포트에서 빈 시간 발견', clock:'월 09:00', why:'리포트는 "어디가 비었는지"까지만 보여 줍니다. 그 자리에서 바로 다음 행동을 제안합니다.' },
+  { t:'월 09:02', n:'쿠폰 정하고 발송 예약', clock:'월 09:02', why:'대상 · 혜택을 바꾸면 예상 결과가 바로 바뀝니다. 원래 그 시간에 오던 손님은 기본으로 빼서 할인만 나가는 일을 줄입니다.' },
+  { t:'화 13:00', n:'손님이 쿠폰을 받음', clock:'화 13:00', why:'2시간 전에 보냅니다. 너무 이르면 잊고, 밤 9시 이후 광고 발송은 별도 동의가 필요해 기본값에서 막습니다.' },
+  { t:'화 15:20', n:'계산대에서 쿠폰 자동 적용', clock:'화 15:20', why:'손님이 쿠폰을 찾아 보여 주지 않아도, 평소처럼 적립 번호만 누르면 적용됩니다. 직원 추가 조작이 없습니다.' },
+  { t:'다음 주 월', n:'결과 확인 · 다음 제안', clock:'다음 주 월 09:00', why:'"쿠폰 쓴 사람 수"가 아니라 쿠폰이 없었으면 안 왔을 손님과 순증 매출을 봅니다.' },
+];
+
+function renderSteps(){
+  $('steps').innerHTML = STEPS.map((s,i)=>`<button data-i="${i}" class="${i===st.step?'on':''} ${i<st.step?'done':''}"><div class="t">${i+1} · ${s.t}</div><div class="n">${s.n}</div></button>`).join('');
+  $('steps').querySelectorAll('button').forEach(b=>b.onclick=()=>go(+b.dataset.i));
+  $('why').textContent = STEPS[st.step].why;
+  $('whyT').textContent = '왜 이렇게';
+  $('clock').textContent = STEPS[st.step].clock;
+  $('phClock').textContent = ['09:00','09:02','13:00','15:20','09:00'][st.step];
+  $('prev').disabled = st.step===0; $('next').disabled = st.step===STEPS.length-1;
+  $('next').textContent = st.step===1 && !st.sent ? '발송 예약하고 다음' : '다음';
+}
+
+// ───── 사장님 화면 ─────
+function chart(showNow){
+  const r = showNow? realize():null;
+  const mx = 400;
+  return `<div class="chart">${HOURS.map((h,i)=>{
+    const isGap = GAP.includes(i);
+    if (showNow && isGap){
+      const v = AVG4W[i] + (r.net/2)/1000;
+      return `<div class="c"><div class="bar now" style="height:${Math.min(100,v/mx*100)}%"><span class="mk" style="bottom:${(AVG4W[i]/v*100).toFixed(1)}%"></span></div><div class="x">${h}</div></div>`;
+    }
+    return `<div class="c"><div class="bar ${isGap?'gap':''}" style="height:${AVG4W[i]/mx*100}%"></div><div class="x">${h}</div></div>`;}).join('')}</div>
+    <div class="legend"><span style="--c:var(--g200)">최근 4주 화요일 평균</span>${showNow?'<span style="--c:var(--blue)">이번 주 빈 시간 (점선 = 평소)</span>':'<span style="--c:var(--orange)">빈 시간</span>'}</div>`;
+}
+function ownerHTML(){
+  const s = st.step;
+  if (s===0){
+    const gapAvg=(AVG4W[6]+AVG4W[7])/2, low=1-gapAvg/WEEKAVG;
+    return `<div class="small">매출 리포트 · 화요일 시간대별</div><div class="h2">화요일 15~17시가 매주 비어요</div>
+      ${chart(false)}
+      <div class="card rec"><div class="t">이 시간을 채워 볼까요?</div>
+        <div class="m">하루 평균보다 ${pct(low)} 낮고, 4주 연속 같은 모습이에요</div>
+        <p class="small" style="color:var(--g700);margin-top:4px">수신 동의한 손님 198명 중, 그 시간에 원래 오지 않던 손님에게만 보내는 쿠폰을 추천해요</p>
+        <button class="btn" id="goSet">추천 쿠폰 보기</button></div>
+      <p class="note">빈 시간 기준: 같은 요일 평균보다 40% 이상 낮은 칸이 3주 이상 반복</p>`;
+  }
+  if (s===1){
+    const e=expect();
+    const segChips = Object.entries(SEGS).map(([k,v])=>{
+      const n=CUST.filter(c=>c.seg===k).length;
+      return `<button class="chip ${st.segs[k]?'on':''}" data-seg="${k}">${v.name}<small>${n}명</small></button>`;}).join('');
+    const discChips = DISC.map((d,i)=>`<button class="chip ${st.disc===i?'on':''}" data-disc="${i}">${d.toLocaleString()}원 할인<small>아메리카노</small></button>`).join('');
+    const habitN = CUST.filter(c=>st.segs[c.seg]&&c.habit).length, capN=CUST.filter(c=>st.segs[c.seg]&&c.capped).length;
+    const cr=e.cannRate;
+    return `<div class="small">쿠폰 보내기 · 추천값이 미리 채워져 있어요</div><div class="h2">화요일 15~17시 한정 쿠폰</div>
+      <div class="field"><div class="k">누구에게</div><div class="chips">${segChips}</div></div>
+      <div class="field"><div class="tog"><div><div class="k2">원래 그 시간에 오던 손님 빼기</div><div class="d">최근 4주 중 2번 이상 화요일 15~17시에 온 손님 ${habitN}명 · 할인만 나가는 걸 막아요</div></div><button class="sw ${st.exclHabit?'on':''}" id="hab" aria-label="원래 오던 손님 빼기"></button></div></div>
+      <div class="field"><div class="k">무엇을</div><div class="chips">${discChips}</div></div>
+      <div class="field"><div class="k">언제 보낼까요</div><div class="chips">
+        <button class="chip ${st.sendAt==='tue13'?'on':''}" data-send="tue13">화 13:00<small>2시간 전 · 추천</small></button>
+        <button class="chip ${st.sendAt==='tue09'?'on':''}" data-send="tue09">화 09:00<small>아침</small></button>
+        <button class="chip" disabled title="야간(21~08시) 광고 발송은 별도 동의가 필요해요">월 22:00<small>야간 · 별도 동의 필요</small></button></div></div>
+      <div class="est">
+        <div><div class="k3">보낼 손님</div><div class="v">${e.sent}명</div></div>
+        <div><div class="k3">예상 순증 방문</div><div class="v good">${e.inc.toFixed(1)}명</div></div>
+        <div><div class="k3">할인만 나갈 비율</div><div class="v ${cr>.3?'warn':''}">${pct(cr)}</div></div>
+      </div>
+      <div class="est" style="grid-template-columns:1fr 1fr;margin-top:6px">
+        <div><div class="k3">예상 할인 비용</div><div class="v">${won(e.cost)}</div></div>
+        <div><div class="k3">예상 순증 이익 (원가 40% 가정)</div><div class="v ${e.profit>=0?'good':'warn'}">${e.profit>=0?'+':''}${won(e.profit)}</div></div>
+      </div>
+      <p class="note">이번 주 다른 쿠폰을 이미 받은 ${capN}명은 자동으로 빠져요 (1인 주 1회)</p>
+      ${cr>.3?'<p class="note warn">원래 오던 손님이 많이 포함돼, 할인이 매출로 이어지지 않을 수 있어요</p>':''}
+      <button class="btn" id="send" ${e.sent?'':'disabled'}>${st.sent?'발송 예약됨 · 수정하기':'발송 예약'}</button>`;
+  }
+  if (s===2){
+    const r=realize();
+    return `<div class="small">쿠폰 · 발송 현황</div><div class="h2">${r.sent}명에게 보냈어요</div>
+      <div class="kpis"><div><div class="k3">열어 본 손님</div><div class="v">${r.open}명</div></div><div><div class="k3">사용 가능 시간</div><div class="v" style="font-size:18px">오늘 15~17시</div></div></div>
+      <div class="card gray"><b>사장님이 따로 할 일은 없어요</b><p class="small" style="color:var(--g700)">손님이 계산대에서 적립 번호를 누르면 쿠폰이 자동으로 적용돼요. 직원에게 알려 줄 필요도 없어요.</p></div>`;
+  }
+  if (s===3){
+    const r=realize(); const part=Math.max(1,Math.round(r.use*.4));
+    return `<div class="small">오늘 · 실시간</div><div class="h2" style="display:flex;gap:8px;align-items:center">15~17시 쿠폰 진행 중 <span class="live">진행 중</span></div>
+      <div class="kpis"><div><div class="k3">쿠폰 사용</div><div class="v">${part}건</div></div><div><div class="k3">지금까지 할인</div><div class="v">${won(part*DISC[st.disc])}</div></div></div>
+      <p class="note">결과는 마감 뒤, 다음 주 월요일 리포트에서 "쿠폰이 없었으면 안 왔을 손님" 기준으로 정리해 드려요.</p>`;
+  }
+  // s===4 결과
+  const r=realize(); const base=(AVG4W[6]+AVG4W[7])*1000;
+  const rows=Object.entries(r.seg).filter(([k,g])=>g.sent).map(([k,g])=>`<tr><td>${SEGS[k].name}</td><td class="r">${g.sent}</td><td class="r">${g.use}</td><td class="r">${g.inc}</td><td class="r">${g.use?pct(g.cann/g.use):'-'}</td></tr>`).join('');
+  // 다음 제안: 할인만 나간 비율이 가장 높은 그룹
+  let worst=null; for (const [k,g] of Object.entries(r.seg)){ if(g.use>=3){ const cr=g.cann/g.use; if(!worst||cr>worst.cr) worst={k,cr}; } }
+  let tip;
+  if (!st.exclHabit) tip = '원래 오던 손님까지 받아 할인만 나간 건이 많았어요. 다음엔 "원래 오던 손님 빼기"를 켜 볼까요?';
+  else if (worst && worst.cr>.25) tip = `${SEGS[worst.k].name}은 쿠폰 없이도 온 손님이 ${pct(worst.cr)}였어요. 다음 주엔 이 그룹을 빼고 보내 볼까요?`;
+  else tip = '할인이 대부분 새 방문으로 이어졌어요. 같은 설정으로 다음 주 화요일에도 보낼까요?';
+  return `<div class="small">매출 리포트 · 지난주 화요일 15~17시</div><div class="h2">${r.net>=0?'빈 시간 매출이 늘었어요':'이번엔 할인이 더 컸어요'}</div>
+    ${chart(true)}
+    <div class="kpis">
+      <div><div class="k3">빈 시간 순증 이익 (원가 · 할인 뺀 뒤)</div><div class="v ${r.profit>=0?'up':'dn'}">${r.profit>=0?'+':''}${won(r.profit)} <small class="muted">매출 ${r.net>=0?'+':''}${pct(r.net/base)}</small></div></div>
+      <div><div class="k3">쿠폰 없었으면 안 왔을 손님</div><div class="v">${r.inc}명 <small class="muted">/ 사용 ${r.use}건</small></div></div>
+      <div><div class="k3">할인만 나간 비율</div><div class="v ${r.cannRate>.3?'dn':''}">${pct(r.cannRate)}</div></div>
+      <div><div class="k3">그중 이번 주 또 온 손님</div><div class="v">${r.revisit}명</div></div>
+    </div>
+    <table class="seg"><tr><th>그룹</th><th class="r">발송</th><th class="r">사용</th><th class="r">새 방문</th><th class="r">할인만</th></tr>${rows}</table>
+    <div class="card rec"><div class="t">다음 제안</div><div class="m" style="font-size:14.5px">${tip}</div>
+      <button class="btn sec" id="redo">설정 바꿔서 다시 보기</button></div>`;
+}
+
+// ───── 손님 화면 ─────
+function phoneHTML(){
+  const s=st.step, d=DISC[st.disc].toLocaleString();
+  const coupon = (used)=>`<div class="coupon ${used?'used':''}"><div class="amt">${d}원</div><div><div class="t2">아메리카노 할인 · 소담커피</div><div class="d">${used?'사용 완료 · 화 15:21':'오늘(화) 15:00~17:00 · 1회'}</div></div></div>`;
+  if (s<2){ $('phTitle').textContent='알림'; return `<div class="empty">${st.sent? '화요일 13:00에 알림톡이 도착할 예정이에요' : '아직 받은 쿠폰이 없어요'}</div>`; }
+  if (s===2){
+    $('phTitle').textContent = st.phoneGot? '토스 · 쿠폰함':'카카오톡 · 알림톡';
+    if (st.phoneGot) return `<div class="small">내 쿠폰</div>${coupon(false)}<p class="small" style="margin-top:10px">계산할 때 적립 번호만 누르면 자동으로 적용돼요.</p>`;
+    return `<div class="kakao"><div class="from">소담커피</div><div class="bubble"><div class="hd">(광고) 소담커피</div>
+      <div class="bd"><b>오늘 15~17시, 아메리카노 ${d}원 할인</b>오늘 오후 한가한 시간에 들러 주세요.<br><span class="small">수신 거부: 홈 &gt; 설정</span></div>
+      <button class="cta" id="getC">쿠폰 받기</button></div><div class="time">오후 1:00</div></div>`;
+  }
+  if (s===3){ $('phTitle').textContent='토스 · 쿠폰함'; return `<div class="small">내 쿠폰</div>${coupon(st.term>=4)}
+      ${st.term>=4?`<div class="coupon" style="display:block"><div class="t2">소담커피 스탬프</div><div class="stamp">${Array.from({length:10},(_,i)=>`<i class="${i<4?'on':''}"></i>`).join('')}</div><div class="d" style="margin-top:6px">4 / 10 · 방금 1개 적립</div></div>`:''}`; }
+  $('phTitle').textContent='토스 · 쿠폰함';
+  return `<div class="small">지난 쿠폰</div>${coupon(true)}<p class="small" style="margin-top:12px">같은 손님은 한 주에 쿠폰을 한 번만 받아요. 여러 매장 쿠폰이 몰려도 겹치지 않아요.</p>`;
+}
+
+// ───── 단말기 화면 ─────
+const ORDER = [['아메리카노',4500],['바닐라 라떼',5300]];
+function termHTML(){
+  const s=st.step; const sum=ORDER.reduce((a,b)=>a+b[1],0); const d=DISC[st.disc];
+  if (s!==3){
+    return `<div class="shop">소담커피</div><div class="ok"><div class="circle" style="background:var(--g200);color:var(--g500)">₩</div><div class="h2">${s<3?'주문을 기다리고 있어요':'오늘 영업 준비 중'}</div><p class="small">${s<3?'3단계에서 손님이 계산대에 와요':''}</p></div>`;
+  }
+  const lines = ORDER.map(o=>`<div class="line"><span>${o[0]}</span><span>${o[1].toLocaleString()}원</span></div>`).join('');
+  if (st.term===0) return `<div class="shop">소담커피 · 결제</div><div class="big">${sum.toLocaleString()}원</div><div style="margin-top:10px">${lines}</div><div class="grow"></div>
+     <button class="btn" data-t="1">적립하고 결제하기</button><button class="btn sec" data-t="3">적립 없이 결제</button>`;
+  if (st.term===1) return `<div class="shop">스탬프 적립</div><div class="h2" style="margin-top:4px">휴대폰 번호를 눌러 주세요</div><div class="num">010 - ●●●● - 1031</div>
+     <div class="pad">${[1,2,3,4,5,6,7,8,9,'',0,'←'].map(n=>`<span>${n}</span>`).join('')}</div><button class="btn" data-t="2">확인</button>`;
+  if (st.term===2) return `<div class="shop">소담커피 · 결제</div><div class="found"><div class="t">쓸 수 있는 쿠폰이 있어요 · 자동 적용</div><div class="m">아메리카노 ${d.toLocaleString()}원 할인</div></div>
+     <div style="margin-top:10px">${lines}<div class="line dc"><span>쿠폰 할인</span><span>-${d.toLocaleString()}원</span></div></div>
+     <div class="big" style="margin-top:8px">${(sum-d).toLocaleString()}원</div><div class="grow"></div>
+     <div class="pm"><span>카드</span><span>토스페이</span></div><button class="btn" data-t="4">카드로 결제</button>`;
+  if (st.term===3) return `<div class="shop">소담커피</div><div class="ok"><div class="circle">✓</div><div class="h2">결제 완료</div><p class="small">${sum.toLocaleString()}원 · 적립 · 쿠폰 없음</p></div><button class="btn sec" data-t="0">처음으로</button>`;
+  return `<div class="shop">소담커피</div><div class="ok"><div class="circle">✓</div><div class="h2">${(sum-d).toLocaleString()}원 결제 완료</div><p class="small">쿠폰 ${d.toLocaleString()}원 할인 · 스탬프 1개 적립</p></div><button class="btn sec" data-t="0">처음으로</button>`;
+}
+
+// ───── 퍼널 ─────
+function funnelHTML(){
+  const pre = st.step<2;
+  const v = pre? (()=>{const e=expect(); return {sent:e.sent, open:e.open, use:e.use, inc:e.inc, cann:e.cann};})()
+              : (()=>{const r=realize(); const f=st.step===2?0:st.step===3?.4:1; return {sent:r.sent, open:r.open, use:r.use*f, inc:r.inc*f, cann:r.cann*f};})();
+  $('fnNote').textContent = pre? '발송 전 · 예상값' : st.step<4? '진행 중' : '확정';
+  const rows=[['보냄',v.sent,''],['열어 봄',v.open,''],['쿠폰 사용',v.use,''],['새 방문',v.inc,''],['할인만 나감',v.cann,'o']];
+  const mx=Math.max(1,v.sent);
+  const fmt=n=> pre? n.toFixed(n<10?1:0) : Math.round(n);
+  return rows.map(([k,n,c])=>`<div>${k}</div><div class="b ${c}"><i style="width:${n/mx*100}%"></i></div><div class="r">${fmt(n)}명</div>`).join('');
+}
+
+// ───── 기록 ─────
+function addLog(w,who,cls,msg){ st.log.unshift({w,who,cls,msg}); }
+function logHTML(){ return st.log.map(l=>`<div><span class="w">${l.w}</span><span class="who ${l.cls}">${l.who}</span><span>${l.msg}</span></div>`).join('') || '<div><span class="w">-</span><span></span><span class="muted">아직 기록이 없어요</span></div>'; }
+
+// ───── 그리기 · 이벤트 ─────
+function render(){
+  renderSteps();
+  $('owner').innerHTML=ownerHTML(); $('phone').innerHTML=phoneHTML(); $('term').innerHTML=termHTML();
+  $('funnel').innerHTML=funnelHTML(); $('log').innerHTML=logHTML();
+  const on=(id,f)=>{ const e=$(id); if(e) e.onclick=f; };
+  on('goSet',()=>go(1));
+  on('hab',()=>{ st.exclHabit=!st.exclHabit; render(); });
+  on('send',()=>{ doSend(); go(2); });
+  on('getC',()=>{ st.phoneGot=true; addLog('화 13:04','손님','c','알림톡에서 쿠폰 받기 → 토스 쿠폰함 저장'); render(); });
+  on('redo',()=>{ st.log=[]; st.sent=false; st.term=0; st.phoneGot=false; go(1); });
+  document.querySelectorAll('[data-seg]').forEach(b=>b.onclick=()=>{ st.segs[b.dataset.seg]=!st.segs[b.dataset.seg]; render(); });
+  document.querySelectorAll('[data-disc]').forEach(b=>b.onclick=()=>{ st.disc=+b.dataset.disc; render(); });
+  document.querySelectorAll('[data-send]').forEach(b=>b.onclick=()=>{ st.sendAt=b.dataset.send; render(); });
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{ termStep(+b.dataset.t); });
+}
+function doSend(){
+  if (st.sent) return; st.sent=true; const e=expect();
+  addLog('월 09:02','사장님','o',`쿠폰 발송 예약 · ${e.sent}명 · ${DISC[st.disc].toLocaleString()}원 · ${st.sendAt==='tue13'?'화 13:00':'화 09:00'}${st.exclHabit?' · 원래 오던 손님 제외':''}`);
+}
+function termStep(t){
+  st.term=t;
+  if (t===1) addLog('화 15:20','단말기','t','손님이 적립하고 결제 선택');
+  if (t===2) addLog('화 15:20','단말기','t',`번호 확인 → 보유 쿠폰 자동 적용 (-${DISC[st.disc].toLocaleString()}원)`);
+  if (t===4){ addLog('화 15:21','단말기','t','카드 결제 완료 · 스탬프 1개'); addLog('화 15:21','사장님','o','포스에 쿠폰 사용 1건 반영'); }
+  render();
+}
+function go(i){
+  i=Math.max(0,Math.min(STEPS.length-1,i));
+  if (i>=2 && !st.sent) doSend();
+  if (i>=2 && st.step<2){ const r=realize(); addLog(st.sendAt==='tue13'?'화 13:00':'화 09:00','시스템','t',`알림톡 ${r.sent}명 발송 · 야간 · 주 1회 상한 확인`); }
+  if (i===4 && st.step<4){ const r=realize(); addLog('화 17:00','시스템','t',`쿠폰 마감 · 사용 ${r.use}건 · 새 방문 ${r.inc}명 · 할인만 ${r.cann}건`); addLog('월 09:00','리포트','o',`순증 이익 ${won(r.profit)} · 다음 제안 생성`); }
+  if (i===3 && st.term===0 && st.step!==3) st.term=0;
+  if (i>=3) st.phoneGot=true;
+  st.step=i; render();
+}
+$('prev').onclick=()=>go(st.step-1);
+$('next').onclick=()=>go(st.step+1);
+// 캡처용: #step=3&term=2
+const h=new URLSearchParams(location.hash.slice(1));
+if (h.has('step')){ const n=+h.get('step'); for(let i=1;i<=n;i++) go(i); if(h.has('term')) termStep(+h.get('term')); if(h.has('got')) st.phoneGot=true; }
+render();
+})();
+</script>
+</body></html>
